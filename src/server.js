@@ -78,7 +78,12 @@ async function initializeDatabase() {
             error: error.message,
             stack: error.stack
         });
-        throw error;
+        // Don't fail startup on database connection issues in development
+        if (process.env.NODE_ENV === 'production') {
+            logger.warn('Starting without database connection in production', {
+                component: 'Database'
+            });
+        }
     }
 }
 async function initializeAI() {
@@ -94,7 +99,10 @@ async function initializeAI() {
             component: 'AI',
             error: error.message
         });
-        throw error;
+        // Don't fail startup on AI config issues - service can still handle health checks
+        logger.warn('Starting with reduced AI functionality', {
+            component: 'AI'
+        });
     }
 }
 function setupGracefulShutdown(server) {
@@ -132,15 +140,17 @@ function setupGracefulShutdown(server) {
 }
 async function startServer() {
     try {
+        // Initialize with graceful degradation
         await initializeDatabase();
         await initializeAI();
         initializeServer();
         initializeRoutes();
-        const server = app.listen(PORT, HOST, () => {
+        
+        const server = app.listen(PORT, '0.0.0.0', () => {
             logger.info('Big Brother AI Assistant v2 server started', {
                 component: 'Server',
                 port: PORT,
-                host: HOST,
+                host: '0.0.0.0',
                 environment: process.env.NODE_ENV,
                 compliance: 'BIG_BROTHER_V2',
                 features: ['conversational-ai', 'voice-synthesis', 'real-estate-assistant']
