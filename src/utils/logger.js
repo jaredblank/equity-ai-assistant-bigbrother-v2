@@ -75,43 +75,52 @@ function createTransports() {
     const logLevel = process.env.LOG_LEVEL || 'info';
     const maxFiles = process.env.LOG_MAX_FILES || '30';
     const maxSize = process.env.LOG_MAX_SIZE || '20m';
-    if (process.env.NODE_ENV === 'development') {
-        transports.push(new winston.transports.Console({
-            level: 'debug',
-            format: consoleFormat
-        }));
-    }
-    const logsDir = path.join(process.cwd(), 'logs');
-    transports.push(new DailyRotateFile({
-        filename: path.join(logsDir, 'bigbrother-ai-%DATE%.log'),
-        datePattern: 'YYYY-MM-DD',
-        level: logLevel,
-        format: aiOperationFormat,
-        maxFiles,
-        maxSize,
-        zippedArchive: true
+    
+    // Always add console transport for production environments
+    transports.push(new winston.transports.Console({
+        level: process.env.NODE_ENV === 'development' ? 'debug' : logLevel,
+        format: process.env.NODE_ENV === 'development' ? consoleFormat : aiOperationFormat
     }));
-    transports.push(new DailyRotateFile({
-        filename: path.join(logsDir, 'bigbrother-ai-error-%DATE%.log'),
-        datePattern: 'YYYY-MM-DD',
-        level: 'error',
-        format: aiOperationFormat,
-        maxFiles,
-        maxSize,
-        zippedArchive: true
-    }));
-    if (process.env.ENABLE_PERFORMANCE_LOGGING === 'true') {
-        transports.push(new DailyRotateFile({
-            filename: path.join(logsDir, 'bigbrother-ai-performance-%DATE%.log'),
-            datePattern: 'YYYY-MM-DD',
-            level: 'info',
-            format: aiOperationFormat,
-            maxFiles,
-            maxSize,
-            zippedArchive: true,
-            filter: (info) => info.operation && info.duration_ms !== undefined
-        }));
+    
+    // Only add file transports if explicitly enabled in production
+    if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_FILE_LOGGING === 'true') {
+        try {
+            const logsDir = path.join(process.cwd(), 'logs');
+            transports.push(new DailyRotateFile({
+                filename: path.join(logsDir, 'bigbrother-ai-%DATE%.log'),
+                datePattern: 'YYYY-MM-DD',
+                level: logLevel,
+                format: aiOperationFormat,
+                maxFiles,
+                maxSize,
+                zippedArchive: true
+            }));
+            transports.push(new DailyRotateFile({
+                filename: path.join(logsDir, 'bigbrother-ai-error-%DATE%.log'),
+                datePattern: 'YYYY-MM-DD',
+                level: 'error',
+                format: aiOperationFormat,
+                maxFiles,
+                maxSize,
+                zippedArchive: true
+            }));
+            if (process.env.ENABLE_PERFORMANCE_LOGGING === 'true') {
+                transports.push(new DailyRotateFile({
+                    filename: path.join(logsDir, 'bigbrother-ai-performance-%DATE%.log'),
+                    datePattern: 'YYYY-MM-DD',
+                    level: 'info',
+                    format: aiOperationFormat,
+                    maxFiles,
+                    maxSize,
+                    zippedArchive: true,
+                    filter: (info) => info.operation && info.duration_ms !== undefined
+                }));
+            }
+        } catch (error) {
+            console.warn('File logging setup failed, using console only:', error.message);
+        }
     }
+    
     return transports;
 }
 const logger = winston.createLogger({
