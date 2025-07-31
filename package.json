@@ -1,0 +1,67 @@
+{
+  "name": "equity-ai-assistant-bigbrother-v2",
+  "version": "2.0.0",
+  "description": "Big Brother AI Assistant v2 - Conversational AI for Real Estate with ElevenLabs Voice Synthesis",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node test/test-bigbrother-ai.js",
+    "test:jest": "jest",
+    "compliance": "node test/test-bigbrother-ai.js",
+    "lint": "eslint src/",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "ai-assistant",
+    "real-estate",
+    "conversational-ai",
+    "elevenlabs",
+    "voice-synthesis",
+    "big-brother-compliance"
+  ],
+  "author": "Equity AI Assistant Team",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "mssql": "^10.0.1",
+    "axios": "^1.6.2",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "joi": "^17.11.0",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.3.1",
+    "multer": "^1.4.5-lts.1",
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.55.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/server.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
+}
